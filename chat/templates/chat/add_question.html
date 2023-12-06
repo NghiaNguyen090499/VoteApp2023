@@ -1,0 +1,48 @@
+<!-- polling/templates/polling/add_question.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Question</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h2>Add Question</h2>
+    <form method="post" action="{% url 'polling:add_question' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+
+    </form>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        <div id="choices">
+            <!-- Ô input đầu tiên -->
+            <div><input type="text" name="choice_text" id="id_choice_text"></div>
+        </div>
+        <!-- <button type="submit">Add Choice</button> -->
+    </form>
+    <br>
+    {% comment %} <a href="{% url 'polling:question_list' %}">Back to Question List</a> {% endcomment %}
+</body>
+
+<script>
+   
+        $(document).ready(function () {
+            // Bắt sự kiện khi người dùng nhập liệu vào ô input
+            $('#id_choice_text').on('input', function () {
+                // Kiểm tra nếu ô input cuối cùng không trống thì thêm một ô input mới
+                if ($('#choices input:last').val().trim() !== '') {
+                    addChoiceInput();
+                }
+            });
+
+            // Hàm thêm ô input mới
+            function addChoiceInput() {
+                var newInput = '<div><input type="text" name="choice_text" id="id_choice_text"></div>';
+                $('#choices').append(newInput);
+            }
+        });
+    </script>
+
+</html>

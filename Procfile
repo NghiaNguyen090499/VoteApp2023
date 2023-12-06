@@ -1,0 +1,1 @@
+web: gunicorn VoteApp.wsgi:apllication  --log-file -

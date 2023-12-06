@@ -1,0 +1,40 @@
+<!-- your_template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Question and Choices</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Hàm thêm ô input mới cho lựa chọn
+            function addChoiceInput() {
+                var newInput = '<div><input type="text" name="choices[]" class="choice_text"> <button type="button" class="removeChoice">Remove</button></div>';
+                $('#choices').append(newInput);
+            }
+
+            // Bắt sự kiện khi người dùng nhấn nút "Thêm nhiều hơn"
+            $('#addMoreBtn').on('click', function () {
+                addChoiceInput();
+            });
+
+            // Bắt sự kiện khi người dùng nhấn nút "Xóa"
+            $('#choices').on('click', '.removeChoice', function () {
+                $(this).parent().remove();
+            });
+        });
+    </script>
+</head>
+<body>
+   <h2>Add Question and Choices</h2>
+   <form method="post" action="{% url 'polling:add_question_and_choices' %}">
+       {% csrf_token %}
+       {{ question_form.as_p }}
+       <div id="choices">
+        <div><input type="text" name="choices[]" class="choice_text"> <button type="button" class="removeChoice">Remove</button></div>
+    </div>
+       <button type="submit">Submit</button>
+       <button type="button" id="addMoreBtn">Add More</button>
+   </form>
+</body>
+</html>

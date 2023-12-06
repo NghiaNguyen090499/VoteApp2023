@@ -1,0 +1,18 @@
+{% comment %} <!-- rate.html -->
+<form method="post" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ rating_form.as_p }}
+    <select name="authentication_methods" multiple>
+        {% for method in authentication_methods %}
+            <option value="{{ method.id }}">{{ method.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Bắt đầu đánh giá</button>
+</form> {% endcomment %}
+
+
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>

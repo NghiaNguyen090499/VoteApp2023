@@ -1,0 +1,131 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}{{ poll.question }}{% endblock %}
+
+{% block content %}
+
+<style>
+@import "compass/css3";
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
+
+@import "compass/css3";
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  background-color:#e4edf4;
+  color:#53626E;
+}
+
+.poll {
+  width: 300px; height: 400px;
+  position:absolute;
+  left:50%; top:50%;
+  margin: -200px 0 0 -150px;
+  border:#bfccd6 3px solid;
+  padding: 20px 40px 20px 40px;
+  @include box-sizing(border-box);
+  border-radius:4px;
+  background-color:#FFF;
+}
+
+  h3 {
+    margin:20px 0 10px 0;
+  }
+  
+  ul, li {
+    list-style:none;
+    margin:0; padding:0;
+  }
+  
+  li {
+    padding: 10px 0 10px 0;
+  }
+  
+  input[type="radio"] {
+    margin: 0 10px 0 0;
+  }
+  
+  button {
+    margin:20px 0 0 0;
+    background-color:#53626E;
+    color:#FFF;
+    border:0;
+    width:100%; height: 40px;
+    font-size:10pt;
+    border-radius:4px;
+  }
+
+</style>
+
+
+  <div class="poll">
+    <h2>{{ poll.question }}</h2>
+    <ul>
+      <form  method="post" action="{% url 'polling:detail' poll.id %}">
+        {% csrf_token %}
+        {{ form}}
+        <button type="submit">Vote</button>
+      </form>
+    </ul>
+   
+    
+  </div>
+  <!-- <form method="post" action="{% url 'polling:detail' poll.id %}">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit">Vote</button>
+  </form> -->
+  {% if messages %}
+  <div class="messages">
+    <ul class="messages-list">
+      {% for message in messages %}
+      <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  <div id="votes-count">Total votes: <span id="total-votes">{{ total_votes }}</span></div>
+  {% comment %} <div id="vote-results">
+    <h3>Results:</h3>
+    <ul>
+      {% for choice in poll.choice_set.all %}
+        <li>{{ choice.choice_text }} - {{ choice.votes }} votes</li>
+      {% endfor %}
+    </ul>
+  </div> {% endcomment %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    function updatePollResults() {
+        $.get("{% url 'polling:poll_results_api' poll.id %}", function(data) {
+            var resultsDiv = $('#vote-results');
+            resultsDiv.empty();
+            resultsDiv.append('<h3>Results:</h3>');
+            var resultsList = $('<ul>');
+            var totalVotesSpan = $('#total-votes');
+            totalVotesSpan.empty();
+            totalVotesSpan.append(data.total_votes)
+            data.results.forEach(function(choice) {
+                resultsList.append('<li>' + choice.choice_text + ' - ' + choice.votes + ' votes</li>');
+            });
+            resultsDiv.append(resultsList);
+        });
+    }
+
+    // Update poll results every 5 seconds
+    setInterval(updatePollResults, 5000); // Adjust the interval as needed
+  </script>
+  <script>
+    // Hide messages with the 'disappearing' tag after 5 seconds
+    const disappearingMessages = document.querySelectorAll('.messages');
+    console.log(disappearingMessages);
+    disappearingMessages.forEach(message => {
+      setTimeout(() => {
+        message.style.display = 'none';
+      }, 1000); // Adjust the delay (in milliseconds) as needed
+    });
+  </script>
+{% endblock %}

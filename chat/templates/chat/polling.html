@@ -1,0 +1,280 @@
+{% extends 'root.html' %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<section class="content">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="box">
+        <div class="box-header with-border">
+          <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="fa fa-plus"></i> Tạo
+            biểu quyết </a>
+        </div>
+        <div class="box-body">
+          <table id="example1" class="table table-bordered table-hover table-striped">
+            <thead style="background-color: #222D32; color:white;">
+              <th>Biểu quyết</th>
+              <th>Thời gian</th>
+              <th>id</th>
+              <th>Action</th>
+            </thead>
+            <tbody>
+              {% for question in questions %}
+
+              <tr>
+                <td>{{ question.question }}</td>
+                <td>{{ question.pub_date }}</td>
+                <td>{{ question.id }}</td>
+
+
+                <td>
+                  <button class='btn btn-primary btn-sm edit btn-flat' data-id='{{question.id }}'><i
+                      class='fa fa-edit'></i> Edit</button>
+                  <button class='btn btn-danger btn-sm delete btn-flat' data-id='{{ voter.id }}'><i
+                      class='fa fa-trash'></i> Delete</button>
+                  <a class="btn btn-primary btn-sm " type=""
+                    href="{% url 'polling:present' question.id %}"><i></i>Trình chiếu</a>
+
+                </td>
+              </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}
+
+{% block modal %}
+<div class="modal fade" id="addnew">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title text-center"><b>THÊM BIỂU QUYẾT - ĐÁNH GIÁ</b></h4>
+      </div>
+      <form method="post" action="{% url 'polling:add_question_and_choices' %}">
+        {% csrf_token %}
+        {{ question_form.as_p }}
+        <div id="choices">
+          Lựa chọn
+          <div><input type="text" name="choices[]" class="choice_text">
+            <button type="button" class="removeChoice">Xóa</button>
+          </div>
+        </div>
+        <button type="button" id="addMoreBtn">Thêm</button>
+        {{ form.as_p }}
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal"><i
+              class="fa fa-close"></i>
+            Close</button>
+          <button type="submit" class="btn btn-success btn-flat" name=""><i class="fa fa-save"></i> Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Edit -->
+<div class="modal fade" id="edit">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><b>Edit Voter</b></h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" method="POST" action="{% url 'polling:updateQuestion' %}">
+          {% csrf_token %}
+          <input type="hidden" class="id" name="id">
+          <div class="form-group">
+            <label for="edit_question" class="col-sm-3 control-label">Câu hỏi</label>
+
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="edit_question" name="first_name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit_pub_date" class="col-sm-3 control-label">Ngày biểu quyết</label>
+
+            <div class="col-sm-9">
+              <input type="text" class="form-control" id="edit_pub_date" name="last_name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit" class="col-sm-3 control-label">Lựa chọn</label>
+            <div class="col-sm-9" id="choices_2">
+
+            </div>
+            <button type="button" id="addMoreBtn">Add More</button>
+          </div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i>
+          Close</button>
+        <button type="submit" class="btn btn-success btn-flat" name="edit"><i class="fa fa-check-square-o"></i>
+          Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete -->
+<div class="modal fade" id="delete">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><b>Deleting...</b></h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" method="POST" action="{% url 'deleteVoter' %}">
+          <input type="hidden" class="id" name="id">
+          {% csrf_token %}
+          <div class="text-center">
+            <p>DELETE VOTER</p>
+            <h2 class="bold fullname"></h2>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i
+            class="fa fa-close"></i> Close</button>
+        <button type="submit" class="btn btn-danger btn-flat" name="delete"><i class="fa fa-trash"></i> Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock modal %}
+
+
+
+{% block custom_js %}
+
+<script>
+  $(function () {
+    $(document).on('click', '.edit', function (e) {
+      e.preventDefault();
+      $('#edit').modal('show');
+      var id = $(this).data('id');
+      getRow(id);
+    });
+
+    $(document).on('click', '.delete', function (e) {
+      e.preventDefault();
+      $('#delete').modal('show');
+      var id = $(this).data('id');
+      getRow(id);
+    });
+
+
+  });
+
+  function getRow(id) {
+    $.ajax({
+      type: 'GET',
+      url: '{% url "polling:viewpoll" %}',
+      data: {
+        id: id
+      },
+      dataType: 'json',
+      success: function (response) {
+        $('.id').val(response.id);
+        $('#edit_question').val(response.question);
+        $('#edit_pub_date').val(response.pub_date);
+
+        // Lấy danh sách lựa chọn
+        var choicesList = response.choices;
+        for (var i = 0; i < choicesList.length; i++) {
+          var choice = choicesList[i];
+          console.log(choice)
+
+          // Tạo phần tử div mới cho mỗi lựa chọn
+          var choiceDiv = $('<div>').addClass('form-group');
+          console.log(choiceDiv)
+
+          // Tạo label cho mỗi lựa chọn
+
+
+          // Tạo input cho mỗi lựa chọn
+          var inputElement = $('<input>')
+            .attr('type', 'text')
+            .attr('name', 'choices[]')
+            .addClass('form-control')
+            .val(choice.choice_text);
+
+          console.log(inputElement)
+
+          // Thêm label và input vào phần tử div
+
+          choiceDiv.append($('<div>').addClass('col-sm-9').append(inputElement));
+
+          // Thêm phần tử div vào phần tử có id là 'choices'
+          $('#choices_2').append(choiceDiv);
+        }
+
+        // Hiển thị lựa chọn trong các ô input
+
+
+        $('.fullname').html(response.first_name + ' ' + response.last_name);
+      }
+    });
+  }
+
+</script>
+
+
+<script>
+  $(document).ready(function () {
+    // Hàm thêm ô input mới cho lựa chọn
+    function addChoiceInput() {
+      var newInput = '<div><input type="text" name="choices[]" class="choice_text"> <button type="button" class="removeChoice">Xóa</button></div>';
+      $('#choices').append(newInput);
+    }
+
+    // Bắt sự kiện khi người dùng nhấn nút "Thêm nhiều hơn"
+    $('#addMoreBtn').on('click', function () {
+      addChoiceInput();
+    });
+
+    // Bắt sự kiện khi người dùng nhấn nút "Xóa"
+    $('#choices').on('click', '.removeChoice', function () {
+      $(this).parent().remove();
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    // Hàm thêm ô input mới cho lựa chọn
+    function addChoiceInput_1() {
+      var newInput = '<div><input type="text" name="choices[]" class="choice_text"> <button type="button" class="removeChoice_1">Remove</button></div>';
+      $('#choices_1').append(newInput);
+    }
+
+    // Bắt sự kiện khi người dùng nhấn nút "Thêm nhiều hơn"
+    $('#addMoreBtn_1').on('click', function () {
+      addChoiceInput_1();
+    });
+
+    // Bắt sự kiện khi người dùng nhấn nút "Xóa"
+    $('#choices_1').on('click', '.removeChoice_1', function () {
+      $(this).parent().remove();
+    });
+  });
+</script>
+{% endblock custom_js %}

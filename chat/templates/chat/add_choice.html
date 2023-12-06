@@ -1,0 +1,114 @@
+<!-- polling/templates/polling/add_choice.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Choice for "{{ question.question_text }}"</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h2>Add Choice for "{{ question.question_text }}"</h2>
+    <form method="post" action="{% url 'polling:add_choice' question.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Vote for "{{ question.question_text }}"</h2>
+    <form method="post" action="{% url 'polling:vote' question.id %}">
+        {% csrf_token %}
+        <ul>
+            {% for choice in question.choice_set.all %}
+                <li>
+                    <label>
+                        <input type="radio" name="choice" value="{{ choice.id }}">
+                        {{ choice.choice_text }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit">Vote</button>
+    </form>
+
+    <br>
+    <a href="{% url 'polling:question_detail' question.id %}">Back to Question Detail</a>
+</body>
+</html>
+
+
+
+<!-- polling/templates/polling/add_choice.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Choice for "{{ question.question_text }}"</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var questionId = {{ question.id }};
+            var socket = new WebSocket('ws://' + window.location.host + '/ws/vote_results/' + questionId + '/');
+
+            socket.onmessage = function(event) {
+                var data = JSON.parse(event.data);
+                voteSuccess(data);
+            };
+
+            function updateResults() {
+                $.ajax({
+                    url: '{% url 'polling:get_vote_results' question.id %}',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // Cập nhật giao diện với kết quả mới
+                        $('#vote-results').html('<h2>' + data.question_text + '</h2>');
+                        var choicesHtml = '<ul>';
+                        $.each(data.choices, function(index, choice) {
+                            choicesHtml += '<li>' + choice.choice_text + ' - Votes: ' + choice.votes + '</li>';
+                        });
+                        choicesHtml += '</ul>';
+                        $('#vote-results').append(choicesHtml);
+                    },
+                    error: function(error) {
+                        console.error('Error fetching vote results:', error);
+                    }
+                });
+            }
+
+            function voteSuccess(data) {
+                // Cập nhật giao diện với số phiếu mới
+                $('#votes-count').text('Votes: ' + data.votes);
+            }
+
+            $('form').submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        // Gửi tin nhắn WebSocket khi vote thành công
+                        socket.send(JSON.stringify({'choice_id': data.choice_id}));
+                        // Cập nhật giao diện với số phiếu mới (nếu muốn)
+                        voteSuccess(data);
+                    },
+                    error: function(error) {
+                        console.error('Error submitting vote:', error);
+                    }
+                });
+            });
+
+            // Gọi hàm cập nhật ngay khi trang được tải
+            updateResults();
+        });
+    </script>
+</head>
+<body>
+    <!-- Form để add choice -->
+    <!-- ... -->
+    
+    <!-- Kết quả đánh giá sẽ được hiển thị tại đây -->
+    <div id="vote-results"></div>
+
+    <br>
+    <a href="{% url 'polling:question_detail' question.id %}">Back to Question Detail</a>
+</body>
+</html>

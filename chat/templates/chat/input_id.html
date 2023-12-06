@@ -1,0 +1,6 @@
+<form method="post">
+    {% csrf_token %}
+    <label for="ip_address">Enter your IP address:</label>
+    <input type="text" name="ip_address" required>
+    <button type="submit">Submit</button>
+</form>
